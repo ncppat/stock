@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>每日股價與 PE 提醒</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --ok: #047857;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 20px 18px;
+    }
+    h1 { margin: 0 0 6px; font-size: 30px; }
+    .sub { color: var(--muted); font-size: 15px; }
+    main { max-width: 1120px; margin: 0 auto; padding: 0 20px 36px; }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    }
+    button, .link-btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 9px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    button.primary { background: var(--accent); color: white; border-color: var(--accent); }
+    button:hover, .link-btn:hover { filter: brightness(0.98); }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    }
+    .section-head {
+      padding: 16px 18px;
+      background: var(--accent-soft);
+      border-bottom: 1px solid var(--border);
+    }
+    .section-head h2 { margin: 0; font-size: 20px; }
+    .section-head p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
+    th { font-size: 13px; color: var(--muted); font-weight: 650; }
+    tr:last-child td { border-bottom: none; }
+    input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 14px;
+      background: #fff;
+    }
+    input:focus { outline: 2px solid #bfdbfe; border-color: #93c5fd; }
+    .code { font-weight: 700; }
+    .source a { color: var(--accent); text-decoration: none; }
+    .source a:hover { text-decoration: underline; }
+    .note {
+      margin-top: 18px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .status { margin-left: auto; color: var(--ok); font-size: 14px; }
+    @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
+    @media print {
+      body { background: white; }
+      .toolbar { display: none; }
+      section, .note { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>每日股價與 PE 提醒</h1>
+    <div class="sub">VTI / VWO / SCHF 早報；006208 / 0051 / 00713 午報。資料可手動更新並儲存在本機瀏覽器。</div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <button class="primary" onclick="saveData()">儲存資料</button>
+      <button onclick="loadData()">讀取已儲存資料</button>
+      <button onclick="clearData()">清除本機資料</button>
+      <button onclick="window.print()">列印 / 另存 PDF</button>
+      <span class="status" id="status">尚未儲存</span>
+    </div>
+
+    <div class="grid">
+      <section>
+        <div class="section-head">
+          <h2>早報：美股 ETF</h2>
+          <p>每日 09:00 參考：VTI / VWO / SCHF</p>
+        </div>
+        <table>
+          <thead>
+            <tr><th>代號</th><th>股價</th><th>PE Ratio</th><th>備註 / 來源</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="code">VTI</td>
+              <td><input data-key="VTI_price" placeholder="例如 300.00"></td>
+              <td><input data-key="VTI_pe" placeholder="例如 25.0"></td>
+              <td class="source"><a href="https://finance.yahoo.com/quote/VTI/" target="_blank" rel="noopener">Yahoo Finance</a></td>
+            </tr>
+            <tr>
+              <td class="code">VWO</td>
+              <td><input data-key="VWO_price"></td>
+              <td><input data-key="VWO_pe"></td>
+              <td class="source"><a href="https://finance.yahoo.com/quote/VWO/" target="_blank" rel="noopener">Yahoo Finance</a></td>
+            </tr>
+            <tr>
+              <td class="code">SCHF</td>
+              <td><input data-key="SCHF_price"></td>
+              <td><input data-key="SCHF_pe"></td>
+              <td class="source"><a href="https://finance.yahoo.com/quote/SCHF/" target="_blank" rel="noopener">Yahoo Finance</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <h2>午報：台股 ETF</h2>
+          <p>每日 13:30 參考：006208 / 0051 / 00713</p>
+        </div>
+        <table>
+          <thead>
+            <tr><th>代號</th><th>股價</th><th>PE Ratio</th><th>備註 / 來源</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="code">006208</td>
+              <td><input data-key="006208_price" placeholder="例如 248.8"></td>
+              <td><input data-key="006208_pe"></td>
+              <td class="source"><a href="https://tw.stock.yahoo.com/quote/006208.TW" target="_blank" rel="noopener">Yahoo 股價</a></td>
+            </tr>
+            <tr>
+              <td class="code">0051</td>
+              <td><input data-key="0051_price" placeholder="曾修正：140"></td>
+              <td><input data-key="0051_pe"></td>
+              <td class="source"><a href="https://www.yuantaetfs.com/product/detail/0051/Basic_information" target="_blank" rel="noopener">元大 PE</a></td>
+            </tr>
+            <tr>
+              <td class="code">00713</td>
+              <td><input data-key="00713_price" placeholder="曾修正：56"></td>
+              <td><input data-key="00713_pe"></td>
+              <td class="source"><a href="https://www.yuantaetfs.com/product/detail/00713/Basic_information" target="_blank" rel="noopener">元大 PE</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <section style="margin-top:18px;">
+      <div class="section-head">
+        <h2>今日整理</h2>
+        <p>可貼上每日簡短結論，例如：股價、PE 變化、是否偏高或偏低。</p>
+      </div>
+      <div style="padding:16px 18px;">
+        <textarea id="memo" style="width:100%; min-height:130px; border:1px solid var(--border); border-radius:10px; padding:12px; font-size:15px; font-family:inherit;" placeholder="輸入今日備註..."></textarea>
+      </div>
+    </section>
+
+    <div class="note">
+      <strong>部署說明：</strong>將此檔案上傳到一般網頁空間即可使用。若之後要「自動抓股價與 PE」，建議改成有後端的版本，例如 Cloudflare Worker / Google Apps Script / PHP Proxy，因為 Yahoo 與元大網頁多半不允許純前端 HTML 直接跨站抓取資料。
+    </div>
+  </main>
+
+  <script>
+    const storageKey = 'daily_stock_pe_dashboard_v1';
+    const inputs = () => Array.from(document.querySelectorAll('input[data-key]'));
+    function setStatus(text) { document.getElementById('status').textContent = text; }
+    function saveData() {
+      const data = { memo: document.getElementById('memo').value, updatedAt: new Date().toLocaleString('zh-TW') };
+      inputs().forEach(input => data[input.dataset.key] = input.value);
+      localStorage.setItem(storageKey, JSON.stringify(data));
+      setStatus('已儲存：' + data.updatedAt);
+    }
+    function loadData() {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) { setStatus('沒有已儲存資料'); return; }
+      const data = JSON.parse(raw);
+      inputs().forEach(input => input.value = data[input.dataset.key] || '');
+      document.getElementById('memo').value = data.memo || '';
+      setStatus(data.updatedAt ? '已讀取：' + data.updatedAt : '已讀取');
+    }
+    function clearData() {
+      localStorage.removeItem(storageKey);
+      inputs().forEach(input => input.value = '');
+      document.getElementById('memo').value = '';
+      setStatus('已清除本機資料');
+    }
+    loadData();
+  </script>
+</body>
+</html>
