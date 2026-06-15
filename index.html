@@ -1,382 +1,230 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>名古屋 5天4夜 親子自由行</title>
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --sunny-color: #d35400;
-            --rainy-color: #2980b9;
-            --bg-sunny: #fdfaf4;
-            --bg-rainy: #f0f4f8;
-            --border: #bdc3c7;
-            --text: #34495e;
-            --flight-bg: #16a085;
-            --hotel-bg: #8e44ad;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: #f5f6fa; color: var(--text); padding: 15px; }
-        .container { max-width: 850px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; }
-        
-        /* 頁首航空資訊看板 */
-        .header { background: linear-gradient(135deg, var(--primary), #1a252f); color: white; padding: 22px; }
-        .header h1 { font-size: 20px; margin-bottom: 12px; text-align: center; letter-spacing: 0.5px; }
-        
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-        @media (max-width: 650px) { .info-grid { grid-template-columns: 1fr; } }
-        
-        .flight-info-box { background: rgba(26, 188, 156, 0.15); border: 1px solid var(--flight-bg); padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.6; }
-        .flight-info-box strong { color: #1abc9c; }
-        
-        .hotel-info-box { background: rgba(142, 68, 173, 0.15); border: 1px solid var(--hotel-bg); padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.6; }
-        .hotel-info-box strong { color: #9b59b6; }
-        .hotel-link { display: inline-block; background: var(--hotel-bg); color: white; padding: 3px 8px; border-radius: 4px; text-decoration: none; font-weight: bold; margin-top: 5px; font-size: 12px; }
-        .hotel-link:hover { background: #7d3c98; }
-
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
-        .summary-card { background: rgba(255,255,255,0.06); padding: 10px; border-radius: 6px; font-size: 13px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        .summary-card strong { color: #f1c40f; }
-
-        /* 天數切換分頁標籤 */
-        .tabs { display: flex; background: #cbd5e1; border-bottom: 2px solid var(--primary); }
-        .tab-btn { flex: 1; padding: 15px 5px; border: none; background: none; font-weight: bold; cursor: pointer; color: var(--primary); text-align: center; font-size: 14px; transition: all 0.2s; }
-        .tab-btn.active { background: var(--primary); color: white; font-size: 15px; }
-
-        /* 內容區 */
-        .content { padding: 20px; display: none; }
-        .content.active { display: block; }
-        
-        /* 每日出門時間提示 */
-        .time-banner { background: #e74c3c; color: white; padding: 8px 15px; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block; margin-bottom: 20px; letter-spacing: 0.5px; }
-        
-        /* 時間軸 */
-        .timeline { position: relative; padding-left: 15px; border-left: 3px solid #dee2e6; margin-top: 10px; }
-        .timeline-item { position: relative; margin-bottom: 25px; }
-        .timeline-item:last-child { margin-bottom: 5px; }
-        .time-slot { font-weight: bold; color: var(--primary); font-size: 15px; margin-bottom: 3px; display: block; }
-        .spot-name { font-weight: 700; font-size: 16px; color: #2c3e50; margin-bottom: 5px; }
-        
-        /* 交通與費用提示 */
-        .trans-tips { font-size: 13px; color: #57606f; background: #f1f2f6; padding: 8px 12px; border-radius: 4px; margin-top: 6px; border-left: 3px solid var(--border); }
-        .fare-tag { background: #2f3542; color: white; padding: 1px 6px; border-radius: 3px; font-size: 11.5px; font-weight: bold; margin-left: 5px; }
-        .ticket-tag { background: #27ae60; color: white; padding: 1px 6px; border-radius: 3px; font-size: 11.5px; font-weight: bold; margin-left: 5px; }
-
-        /* 晴雨雙軌並列排版 */
-        .fork-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
-        @media (max-width: 650px) { .fork-container { grid-template-columns: 1fr; gap: 10px; } }
-        
-        .fork-box { padding: 12px 15px; border-radius: 6px; border: 1px solid; font-size: 13.5px; line-height: 1.5; }
-        .fork-box.sunny { background-color: var(--bg-sunny); border-color: #f1c40f; }
-        .fork-box.rainy { background-color: var(--bg-rainy); border-color: #3498db; }
-        
-        .fork-title { font-weight: bold; font-size: 14px; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
-        .fork-title.sunny { color: var(--sunny-color); }
-        .fork-title.rainy { color: var(--rainy-color); }
-        
-        .important-note { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>每日股價與 PE 提醒</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --ok: #047857;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 20px 18px;
+    }
+    h1 { margin: 0 0 6px; font-size: 30px; }
+    .sub { color: var(--muted); font-size: 15px; }
+    main { max-width: 1120px; margin: 0 auto; padding: 0 20px 36px; }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    }
+    button, .link-btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 9px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    button.primary { background: var(--accent); color: white; border-color: var(--accent); }
+    button:hover, .link-btn:hover { filter: brightness(0.98); }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    }
+    .section-head {
+      padding: 16px 18px;
+      background: var(--accent-soft);
+      border-bottom: 1px solid var(--border);
+    }
+    .section-head h2 { margin: 0; font-size: 20px; }
+    .section-head p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
+    th { font-size: 13px; color: var(--muted); font-weight: 650; }
+    tr:last-child td { border-bottom: none; }
+    input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 14px;
+      background: #fff;
+    }
+    input:focus { outline: 2px solid #bfdbfe; border-color: #93c5fd; }
+    .code { font-weight: 700; }
+    .source a { color: var(--accent); text-decoration: none; }
+    .source a:hover { text-decoration: underline; }
+    .note {
+      margin-top: 18px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .status { margin-left: auto; color: var(--ok); font-size: 14px; }
+    @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
+    @media print {
+      body { background: white; }
+      .toolbar { display: none; }
+      section, .note { box-shadow: none; }
+    }
+  </style>
 </head>
 <body>
+  <header>
+    <h1>每日股價與 PE 提醒</h1>
+    <div class="sub">VTI / VWO / SCHF 早報；006208 / 0051 / 00713 午報。資料可手動更新並儲存在本機瀏覽器。</div>
+  </header>
 
-<div class="container">
-    <div class="header">
-        <h1>✈️ 名古屋 5天4夜 親子自由行</h1>
-        
-        <div class="info-grid">
-            <div class="flight-info-box">
-                🔑 <strong>星宇航空訂位代號：DF3PHA</strong> (第一航廈起降)<br>
-                🍱 <strong>去程 JX838 餐點：</strong>胡同柚子胡椒雞腿排丼<br>
-                🍛 <strong>回程 JX839 餐點：</strong>香烤雞腿咖哩烏龍麵<br>
-                🌱 <span>(其中一份已修改為：<strong>東方素食餐</strong>)</span><br>
-                🍹 <strong>限定福利：</strong>回程可在機上點「星宇特調」。
-            </div>
-            
-            <div class="hotel-info-box">
-                🏨 <strong>飯店資訊：</strong><br>
-                納屋橋里士滿飯店 (Richmond Hotel Nagoya Nayabashi)<br>
-                豪華雙人房 (31㎡ 大空間 / 180cm加大雙人床)<br>
-                名古屋市中區榮1-2-7 (鄰近伏見站與廣小路通)<br>
-                🗺️ <strong>地圖導航連結：</strong><br>
-                <a class="hotel-link" href="https://maps.app.goo.gl/3cd1PdnwjwdUBUeVA" target="_blank">📍 開啟 Google Maps 導航</a>
-            </div>
-        </div>
-
-        <div class="summary-grid">
-            <div class="summary-card">🛫 去程 6/18(週四) 14:55 TPE ➔ 18:45 NGO</div>
-            <div class="summary-card">🛬 回程 6/22(週一) 19:55 NGO ➔ 22:00 TPE</div>
-        </div>
+  <main>
+    <div class="toolbar">
+      <button class="primary" onclick="saveData()">儲存資料</button>
+      <button onclick="loadData()">讀取已儲存資料</button>
+      <button onclick="clearData()">清除本機資料</button>
+      <button onclick="window.print()">列印 / 另存 PDF</button>
+      <span class="status" id="status">尚未儲存</span>
     </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchDay(1)">D1 (6/18 週四)</button>
-        <button class="tab-btn" onclick="switchDay(2)">D2 (6/19 週五)</button>
-        <button class="tab-btn" onclick="switchDay(3)">D3 (6/20 週六)</button>
-        <button class="tab-btn" onclick="switchDay(4)">D4 (6/21 週日)</button>
-        <button class="tab-btn" onclick="switchDay(5)">D5 (6/22 週一)</button>
+    <div class="grid">
+      <section>
+        <div class="section-head">
+          <h2>早報：美股 ETF</h2>
+          <p>每日 09:00 參考：VTI / VWO / SCHF</p>
+        </div>
+        <table>
+          <thead>
+            <tr><th>代號</th><th>股價</th><th>PE Ratio</th><th>備註 / 來源</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="code">VTI</td>
+              <td><input data-key="VTI_price" placeholder="例如 300.00"></td>
+              <td><input data-key="VTI_pe" placeholder="例如 25.0"></td>
+              <td class="source"><a href="https://finance.yahoo.com/quote/VTI/" target="_blank" rel="noopener">Yahoo Finance</a></td>
+            </tr>
+            <tr>
+              <td class="code">VWO</td>
+              <td><input data-key="VWO_price"></td>
+              <td><input data-key="VWO_pe"></td>
+              <td class="source"><a href="https://finance.yahoo.com/quote/VWO/" target="_blank" rel="noopener">Yahoo Finance</a></td>
+            </tr>
+            <tr>
+              <td class="code">SCHF</td>
+              <td><input data-key="SCHF_price"></td>
+              <td><input data-key="SCHF_pe"></td>
+              <td class="source"><a href="https://finance.yahoo.com/quote/SCHF/" target="_blank" rel="noopener">Yahoo Finance</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <h2>午報：台股 ETF</h2>
+          <p>每日 13:30 參考：006208 / 0051 / 00713</p>
+        </div>
+        <table>
+          <thead>
+            <tr><th>代號</th><th>股價</th><th>PE Ratio</th><th>備註 / 來源</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="code">006208</td>
+              <td><input data-key="006208_price" placeholder="例如 248.8"></td>
+              <td><input data-key="006208_pe"></td>
+              <td class="source"><a href="https://tw.stock.yahoo.com/quote/006208.TW" target="_blank" rel="noopener">Yahoo 股價</a></td>
+            </tr>
+            <tr>
+              <td class="code">0051</td>
+              <td><input data-key="0051_price" placeholder="曾修正：140"></td>
+              <td><input data-key="0051_pe"></td>
+              <td class="source"><a href="https://www.yuantaetfs.com/product/detail/0051/Basic_information" target="_blank" rel="noopener">元大 PE</a></td>
+            </tr>
+            <tr>
+              <td class="code">00713</td>
+              <td><input data-key="00713_price" placeholder="曾修正：56"></td>
+              <td><input data-key="00713_pe"></td>
+              <td class="source"><a href="https://www.yuantaetfs.com/product/detail/00713/Basic_information" target="_blank" rel="noopener">元大 PE</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
     </div>
 
-    <div id="day1" class="content active">
-        <div class="time-banner">⏰ 剛性集合時間：12:30 前須抵達桃園機場第一航廈櫃檯</div>
-        <div class="timeline">
-            <div class="timeline-item">
-                <span class="time-slot">14:55 - 18:45</span>
-                <div class="spot-name">星宇航空 JX838 啟航 ➔ 中部國際機場第一航廈</div>
-                <div class="trans-tips">機上享用「胡同柚子胡椒雞腿排丼」。出關程序預估 45-60 分鐘。</div>
-            </div>
-            <div class="timeline-item">
-                <span class="time-slot">19:30 - 20:35</span>
-                <div class="spot-name">綠色窗口購買兒童西瓜卡，搭機場快線：中部國際機場 ➔ 名鐵名古屋站</div>
-                <div class="trans-tips">➡️ <strong>搭乘 20:07 的 μ-SKY 特急列車</strong> 直達名鐵名古屋站（車程 28 分鐘）。<br>💰 <strong>車資精算：</strong>刷 Suica卡扣款（大人單程 980 日圓×2，小孩 490 日圓×1），並另行購買 3 張指定席券（450 日圓×3）。<span class="fare-tag">全家總計：3,800 日圓</span></div>
-            </div>
-            <div class="timeline-item">
-                <span class="time-slot">20:45 - 21:00</span>
-                <div class="spot-name">🏨 前往納屋橋里士滿飯店辦理入住</div>
-                <div class="fork-container">
-                    <div class="fork-box sunny">
-                        <div class="fork-title sunny">☀️ 晴天方案：步行探路</div>
-                        沿著廣小路通平地直走 10-12 分鐘（約 800 公尺）抵達飯店。
-                    </div>
-                    <div class="fork-box rainy">
-                        <div class="fork-title rainy">🌧️ 雨天方案：無縫避雨計程車</div>
-                        直接在名古屋車站計程車招呼站搭車至飯店大門，車程 5 分鐘。<span class="fare-tag">計程車費預估：600 - 800 日圓</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <section style="margin-top:18px;">
+      <div class="section-head">
+        <h2>今日整理</h2>
+        <p>可貼上每日簡短結論，例如：股價、PE 變化、是否偏高或偏低。</p>
+      </div>
+      <div style="padding:16px 18px;">
+        <textarea id="memo" style="width:100%; min-height:130px; border:1px solid var(--border); border-radius:10px; padding:12px; font-size:15px; font-family:inherit;" placeholder="輸入今日備註..."></textarea>
+      </div>
+    </section>
+
+    <div class="note">
+      <strong>部署說明：</strong>將此檔案上傳到一般網頁空間即可使用。若之後要「自動抓股價與 PE」，建議改成有後端的版本，例如 Cloudflare Worker / Google Apps Script / PHP Proxy，因為 Yahoo 與元大網頁多半不允許純前端 HTML 直接跨站抓取資料。
     </div>
+  </main>
 
-    <div id="day2" class="content">
-        <div class="time-banner">⏰ 剛性出門時間：08:45 (為配合動植物園 09:00 開館起算)</div>
-        <div class="timeline">
-            <div class="timeline-item">
-                <span class="time-slot">08:45 - 09:00</span>
-                <div class="spot-name">去程：前往東山動植物園</div>
-                <div class="trans-tips">➡️ 從飯店旁的「伏見站」搭乘 <strong>地鐵東山線</strong> 一車直達「東山公園站」（車程 11 分鐘）。<br>💰 <strong>車資精算：</strong>地鐵新制單程票價包含大人 270 日圓 × 2 ＋ 小孩兒童票 140 日圓 × 1。<span class="fare-tag">全家單程總計：680 日圓</span></div>
-            </div>
-            
-            <div class="timeline-item">
-                <span class="time-slot">09:00 - 12:00</span>
-                <div class="spot-name">🎯 動物區主線任務 (09:00 開館)</div>
-                <div class="trans-tips">
-                    鎖定：<strong>無尾熊館、北方熊苑、大象、長頸鹿</strong>。上午剛開館人潮最少、氣溫涼爽，是最佳觀賞與拍照時段。<br>
-                    🎫 <strong>門票價格 (動植物園 + 天空塔共通券)：</strong>大人單人 640 日圓，國中生以下免費。<span class="ticket-tag">兩位大人總計：1,280 日圓</span>
-                </div>
-            </div>
-            
-            <div class="timeline-item">
-                <span class="time-slot">12:00 - 13:00</span>
-                <div class="spot-name">🍔 園內餐廳享用午餐</div>
-                <div class="trans-tips">直接在動物園中央美食街或熱門主題餐車就地補給，節省移動體力。</div>
-            </div>
-            
-            <div class="timeline-item">
-                <span class="time-slot">13:00 - 15:30</span>
-                <div class="spot-name">🌿 植物園區 ✕ 雙軌避雨基地</div>
-                <div class="fork-container">
-                    <div class="fork-box sunny">
-                        <div class="fork-title sunny">☀️ 晴天方案：溫室與植物園散步</div>
-                        漫步植物園區、欣賞歷史建築溫室與大草皮。
-                    </div>
-                    <div class="fork-box rainy">
-                        <div class="fork-title rainy">🌧️ 雨天防線：世界鱂魚館(水族館)與昆蟲館</div>
-                        <strong>大雨時全家移往植物園內的世界鱂魚館(水族館)或昆蟲館室內展區</strong>，高密度室內大棚，完全不影響行程品質。
-                    </div>
-                </div>
-            </div>
-            
-            <div class="timeline-item">
-                <span class="time-slot">15:30 - 17:30</span>
-                <div class="spot-name">🚝 傍晚分岔：Linimo 磁浮列車圓夢 vs 回程撤退</div>
-                <div class="fork-container">
-                    <div class="fork-box sunny">
-                        <div class="fork-title sunny">☀️ 晴天解鎖：Linimo 磁浮列車體驗</div>
-                        ➡️ <strong>交通與時耗：</strong>從「東山公園站」續搭地鐵東山線往東至終點「藤之丘站」<strong>(10分鐘車程屬於1區：兩大一小共 530 日圓)</strong>。隨後無縫轉乘全日本唯一商業磁浮 Linimo 列車。<br>
-                        💰 <strong>Linimo 車資(藤之丘往返愛·地球博紀念公園)：</strong>來回兩位大人共 1,440 日圓 ＋ 小孩兒童票來回 360 日圓 ➔ 磁浮段共計 1,800 日圓。<br>
-                        ⏱️ <strong>藤之丘到磁浮線核心站單程：</strong>約 13-15 分鐘。<br>
-                        ✨ <span class="fare-tag">下午地鐵延伸段 ＋ 磁浮段全家總交通費共：2,330 日圓</span>
-                    </div>
-                    <div class="fork-box rainy">
-                        <div class="fork-title rainy">🌧️ 雨天/疲勞回程防線：直回飯店</div>
-                        若雨勢過大或孩子放電完畢，取消 Linimo。直接由東山公園站搭地鐵東山線一車直回伏見站。<span class="fare-tag">全家回程地鐵費：680 日圓</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="day3" class="content">
-        <div class="time-banner">⏰ 剛性出門時間：08:40 (為配合名古屋城 09:00 開館起算)</div>
-        
-        <div class="important-note">
-            ⚖️ <strong>【交通與門票折扣總帳大對決】買券 vs 刷 IC 卡單買：</strong><br>
-            • <strong>方案 A (推薦買券)：</strong>全家購買 <strong>「週末環保券」</strong>（包含小孩一日券票）。大人 620 日圓 × 2 + 小孩 310 日圓 × 1 = <span class="fare-tag">全家固定總車資 1,240 日圓</span>，今天地鐵無限刷！<br>
-               🎁 <strong>環保券現場購票特權：</strong><br>
-               1. 名古屋城門票：大人原價 500 ➔ <strong>優惠價 400 日圓</strong> (兩大共省 200 日圓)<br>
-               2. 磁浮科學館門票：大人原價 800 ➔ <strong>優惠價 720 日圓</strong> (兩大共省 160 日圓)<br>
-               📊 <strong>方案 A（車資 + 雙館折價門票）總花費 = 3,790 日圓</strong><br><br>
-            • <strong>方案 B (不買券，全日刷單程 IC 卡 ✕ 門票全無折扣原價總車資)：</strong><br>
-               1. 全日原價地鐵車資（兩大一小，含2區調價步調）：共計 2,510 日圓<br>
-               2. 名古屋城原價門票（兩大）：1,000 日圓<br>
-               3. 科學館原價門票（兩大）：1,600 日圓<br>
-               📊 <strong>方案 B（原價車資 + 原價門票）總花費 = 5,110 日圓</strong><br>
-               🟢 <strong>精算總結：方案 A 直接大勝！幫您整天穩穩現省 1,320 日圓！</strong>
-        </div>
-        
-        <div class="timeline">
-            <div class="timeline-item">
-                <span class="time-slot">08:40 - 09:00</span>
-                <div class="spot-name">前往名古屋城</div>
-                <div class="trans-tips">➡️ 從「伏見站」搭東山線至榮站，轉 <strong>地鐵名城線</strong> 到「名古屋城站」下車（車程約 15 分鐘）。</div>
-            </div>
-            
-            <div class="timeline-item">
-                <span class="time-slot">09:00 - 12:00</span>
-                <div class="spot-name">🏯 上午晴天黃金期：名古屋城 ➔ 金鯱橫丁 ➔ 下水道科學館 (09:00 開館)</div>
-                <div class="trans-tips">
-                    參觀本丸御殿與金虎鯨（下水道科學館完全免費）。<br>
-                    🎫 <strong>出示環保券折扣門票：</strong>兩位大人特惠價共 <strong>800 日圓</strong>（原價 1,000），小孩免費。<span class="ticket-tag">總計：800 日圓</span>
-                </div>
-            </div>
-            
-            <div class="timeline-item">
-                <span class="time-slot">12:30 - 13:00</span>
-                <div class="spot-name">移防下午場景：名古屋城 ➔ 名古屋市科學館</div>
-                <div class="trans-tips">➡️ 從「名古屋城站」搭名城線至榮站，轉東山線回到「伏見站」，慢步 5 分鐘抵達科學館。</div>
-            </div>
-            
-            <div class="timeline-item">
-                <span class="time-slot">13:00 - 16:30</span>
-                <div class="spot-name">🪐 下午雨天防線：名古屋市科學館 (⏰ 17:00 閉館，最後入館 16:30)</div>
-                <div class="trans-tips">
-                    進入全室內展區。挑戰最大天象儀與極地體驗。<br>
-                    🎫 <strong>出示環保券折扣門票 (展示室+天象儀組合票)：</strong>兩位大人特惠價共 <strong>1,440 日圓</strong>（原價 1,600），中學生以下免費。<span class="ticket-tag">總計：1,440 日圓</span>
-                </div>
-            </div>
-            
-            <div class="timeline-item">
-                <span class="time-slot">17:00 - 20:30</span>
-                <div class="spot-name">🏮 晚上：大須觀音 ➔ 大須商店街逛街吃晚飯</div>
-                <div class="fork-container">
-                    <div class="fork-box sunny">
-                        <div class="fork-title sunny">☀️ 晴天方案：慢步前進</div>
-                        從科學館向南散步 10 分鐘到大須觀音，逛加蓋商店街吃飯。
-                    </div>
-                    <div class="fork-box rainy">
-                        <div class="fork-title rainy">🌧️ 雨天方案：乾爽計程車</div>
-                        外面下大雨時，科學館門口<strong>直接打車 3 分鐘</strong>無縫送到全加蓋、100% 遮雨的大須商店街大屋簷下。<span class="fare-tag">計程車費預估：600 - 700 日圓</span>
-                    </div>
-                </div>
-                <div class="trans-tips" style="margin-top: 10px;">🛒 <strong>大須任務：</strong>全加蓋天棚下完全淋不到雨。在此開逛玩具店、扭蛋店、大啖章魚燒與炸雞，直接在此解決豐盛晚餐。回程由「上前津站」搭地鐵回伏見。</div>
-            </div>
-        </div>
-    </div>
-
-    <div id="day4" class="content">
-        <div class="time-banner">⏰ 剛性出門時間：09:10 (為配合豐田紀念館 09:30 開館起算)</div>
-        <div class="timeline">
-            <div class="timeline-item">
-                <span class="time-slot">09:10 - 09:30</span>
-                <div class="spot-name">前往豐田產業技術紀念館</div>
-                <div class="fork-container">
-                    <div class="fork-box sunny">
-                        <div class="fork-title sunny">☀️ 🟢 晴天方案：搭乘觀光巴士 (Meituru)</div>
-                        至飯店旁「廣小路伏見」搭乘 09:19 觀光巴士直達豐田紀念館門口。<br>
-                        💰 <strong>巴士一日券價格：</strong>大人 500 日圓 × 2 + 小孩 250 日圓 × 1。<span class="fare-tag">全家購券總計：1,250 日圓</span>
-                    </div>
-                    <div class="fork-box rainy">
-                        <div class="fork-title rainy">🌧️ 🔴 下雨方案：果斷搭計程車</div>
-                        直接從飯店門口搭乘計程車，8 分鐘空降紀念館正門口，避開等公車與淋雨。<span class="fare-tag">計程車費預估：1,300 - 1,500 日圓</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="timeline-item">
-                <span class="time-slot">09:30 - 12:15</span>
-                <div class="spot-name">🏎️ 豐田產業技術紀念館 (09:30 開館)</div>
-                <div class="fork-container" style="grid-template-columns: 1fr; margin-top: 5px;">
-                    <div class="fork-box sunny" style="background-color: #f8f9fa; border-color: #bdc3c7;">
-                        🎫 <strong>門票價格 (依當天交通工具享有不同折扣)：</strong><br>
-                        • ☀️ <strong>晴天出示觀光巴士一日券折扣：</strong>兩位大人特惠共 1,600 日圓 + 小孩 160 日圓 ➔ <span class="ticket-tag">全家折扣門票：1,760 日圓</span><br>
-                        • 🌧️ <strong>雨天搭乘計程車之官方原價：</strong>兩位大人原價共 2,000 日圓 + 小孩 200 日圓 ➔ <span class="ticket-tag">全家原價門票：2,200 日圓</span>
-                    </div>
-                </div>
-                <div class="trans-tips">全室內汽車與紡織科技樂園，館內可動手做紀念小賽車。</div>
-            </div>
-            
-            <div class="timeline-item">
-                <span class="time-slot">12:30 - 17:30</span>
-                <div class="spot-name">🧸 移防相鄰景點：則武之森公園 ➔ 永旺夢樂城 (AEON)</div>
-                <div class="fork-container">
-                    <div class="fork-box sunny">
-                        <div class="fork-title sunny">☀️ 晴天漫步</div>
-                        豐田館出口步行 5 分鐘，橫穿歐式紅磚則武之森草皮花園入商場。
-                    </div>
-                    <div class="fork-box rainy">
-                        <div class="fork-title rainy">🌧️ 雨天打車</div>
-                        外面暴雨時，豐田館大門打車 2 分鐘直達 AEON 入口。<span class="fare-tag">計程車費：550 - 600 日圓</span>
-                    </div>
-                </div>
-                <div class="trans-tips" style="margin-top: 10px;">
-                    📚 <strong>永旺夢樂城任務：</strong>看網美大書牆、逛玩具反斗城。結束後商場門口<strong>打車回飯店</strong>。<span class="fare-tag">回程計程車費預估：1,300 日圓</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="day5" class="content">
-        <div class="time-banner">⏰ 剛性出門時間：09:15 (辦理 Check-out 攜帶大行李箱出發)</div>
-        <div class="timeline">
-            <div class="timeline-item">
-                <span class="time-slot">09:30 - 11:00</span>
-                <div class="spot-name">🦐 柳橋中央市場 (04:00-10:00 核心營業)</div>
-                <div class="trans-tips">➡️ 飯店退房後推行李平地慢步 5 分鐘即達市場，看海鮮拍大魚。結束後走 3 分鐘直接進名古屋車站。一條龍平地直線免車資。</div>
-            </div>
-            <div class="timeline-item">
-                <span class="time-slot">11:15 - 12:15</span>
-                <div class="spot-name">🍱 名古屋車站百貨美食街午餐 ＆ 特產採購</div>
-                <div class="trans-tips">大行李暫存車站投幣置物櫃（大箱約 700-800 日圓）。吃最後的名古屋美食並採購伴手禮。</div>
-            </div>
-            <div class="timeline-item">
-                <span class="time-slot">12:20 - 12:48</span>
-                <div class="spot-name">🚅 移動至機場：名鐵名古屋站 ➔ 中部國際機場第一航廈</div>
-                <div class="trans-tips">➡️ 搭乘 12:20 的 <strong>μ-SKY 特急列車</strong>，28 分鐘直達機場 T1。<br>💰 <strong>車資精算：</strong>刷 Suica卡扣款（大人 980 日圓×2，小孩 490 日圓×1），加購 3 張指定席券（450 日圓×3）。<span class="fare-tag">全家總計：3,800 日圓</span></div>
-            </div>
-            <div class="timeline-item">
-                <span class="time-slot">13:15 - 16:45</span>
-                <div class="spot-name">✈️ 飛機博物館：Flight of Dreams (10:00 開館)</div>
-                <div class="trans-tips">行李鎖機場 T1 置物櫃。空手走高空遮蔽電動天橋步道（步行 8 分鐘）直奔波音館（1樓主展區免費參觀）。</div>
-            </div>
-            <div class="timeline-item">
-                <span class="time-slot">17:00 - 19:55</span>
-                <div class="spot-name">🛫 第一航廈櫃檯報到 ➔ 星宇航空 JX839 返航</div>
-                <div class="trans-tips">17:00 開櫃辦理托運。登機享用「香烤雞腿咖哩烏龍麵」（一份東方素食餐）。<strong>別忘了點杯「星宇特調」！</strong> 22:00 返抵國門。</div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<script>
-    function switchDay(dayNum) {
-        // 更新按鈕 active 狀態
-        document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
-            if(idx === dayNum - 1) btn.classList.add('active');
-            else btn.classList.remove('active');
-        });
-
-        // 切換顯示的內容
-        document.querySelectorAll('.content').forEach((content) => {
-            content.classList.remove('active');
-        });
-        document.getElementById('day' + dayNum).classList.add('active');
-        
-        // 滑動回到最上方以便手機觀看
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+  <script>
+    const storageKey = 'daily_stock_pe_dashboard_v1';
+    const inputs = () => Array.from(document.querySelectorAll('input[data-key]'));
+    function setStatus(text) { document.getElementById('status').textContent = text; }
+    function saveData() {
+      const data = { memo: document.getElementById('memo').value, updatedAt: new Date().toLocaleString('zh-TW') };
+      inputs().forEach(input => data[input.dataset.key] = input.value);
+      localStorage.setItem(storageKey, JSON.stringify(data));
+      setStatus('已儲存：' + data.updatedAt);
     }
-</script>
-
+    function loadData() {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) { setStatus('沒有已儲存資料'); return; }
+      const data = JSON.parse(raw);
+      inputs().forEach(input => input.value = data[input.dataset.key] || '');
+      document.getElementById('memo').value = data.memo || '';
+      setStatus(data.updatedAt ? '已讀取：' + data.updatedAt : '已讀取');
+    }
+    function clearData() {
+      localStorage.removeItem(storageKey);
+      inputs().forEach(input => input.value = '');
+      document.getElementById('memo').value = '';
+      setStatus('已清除本機資料');
+    }
+    loadData();
+  </script>
 </body>
 </html>
